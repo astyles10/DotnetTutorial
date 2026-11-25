@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using LiteDb;
-
 // Spin up some threads generating random numbers
 // Write some test classes
 // Write some test interfaces
@@ -37,6 +35,17 @@ class Program
     }
     JobsData jobsDb = new();
     jobsDb.Init();
+    JobsData.Job newJob = new()
+    {
+      Id = Guid.NewGuid(),
+      Site = "Wellington",
+      Status = JobsData.JobStatus.Pending,
+      UpdatedAt = DateTime.Now
+    };
+    jobsDb.InsertNewJob(newJob);
+    jobsDb.QueryJobs();
+
+    /* Move Web App into separate thread / async call */
 
     WebApplicationBuilder builder = WebApplication.CreateBuilder();
     // 'Kestrel' is the web server built into ASP.Net core.
