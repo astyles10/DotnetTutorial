@@ -4,7 +4,6 @@ namespace CSharpTutorial;
 // 'using' keyword imports a namespace or defines other 'using' directives. This would be similar to an #include <file>
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -22,28 +21,21 @@ class Program
 
   // The C++ equivalent for this is typedef std::function<int>(void) cbFunctionType;
   public delegate int PostHandler();
+  private static JobsDatabase _jobsDatabase = new();
+
   static void Main(string[] args)
   {
-    Console.WriteLine("Hello, World!");
-    if (args.Length > 0)
+    if (!InitialiseJobsDatabase())
     {
-      Console.WriteLine($"Got {args.Length} args wow");
-      foreach (string arg in args)
-      {
-        Console.WriteLine($"Got arg {arg}");
-      }
+      return;
     }
-    JobsData jobsDb = new();
-    jobsDb.Init();
-    JobsData.Job newJob = new()
-    {
-      Id = Guid.NewGuid(),
-      Site = "Wellington",
-      Status = JobsData.JobStatus.Pending,
-      UpdatedAt = DateTime.Now
-    };
-    jobsDb.InsertNewJob(newJob);
-    jobsDb.QueryJobs();
+
+    ParseCommandLineArgs(ref args);
+    _jobsDatabase.GetAllJobStatuses();
+    _jobsDatabase.GetJobStatusForSite("Wodonga");
+    // Next steps: Extend the Web API and integrate it with the database
+    // Create a simple Web UI to interact with the API. There's probably some .NET MVC thing to use
+    // Probably extend and modify the database
 
     /* Move Web App into separate thread / async call */
 
@@ -98,7 +90,33 @@ class Program
     webApp.Run();
     // Ctrl+C signal closes an application gracefully (at least in this instance)
     Console.WriteLine("Closing webapp");
-    jobsDb.Close();
+    _jobsDatabase.Close();
+  }
+
+  private static void ParseCommandLineArgs(ref string[] args)
+  {
+    foreach (string arg in args)
+    {
+      if (arg == "--seed-db")
+      {
+        JobDbSeeder seeder = new(ref _jobsDatabase, 100);
+        seeder.Seed();
+      }
+    }
+  }
+
+  private static bool InitialiseJobsDatabase()
+  {
+    // TODO: At some point after filling functionality, implement try catches properly
+    try
+    {
+      _jobsDatabase.Init();
+      return true;
+    }
+    catch
+    {
+      return false;
+    }
   }
 
   private static int HandlePostRequest()
