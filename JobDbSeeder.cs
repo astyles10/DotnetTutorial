@@ -3,7 +3,6 @@ namespace CSharpTutorial;
 class JobDbSeeder
 {
   private readonly JobsDatabase _database;
-  private readonly int _numRecords;
   private readonly string[] _siteLocations = [
     "Wellington",
     "Sydney",
@@ -17,10 +16,9 @@ class JobDbSeeder
     "Shanghai"
   ];
 
-  public JobDbSeeder(ref JobsDatabase jobsDb, int numRecords)
+  public JobDbSeeder(ref JobsDatabase jobsDb)
   {
     _database = jobsDb;
-    _numRecords = numRecords;
   }
 
   public void Seed()
