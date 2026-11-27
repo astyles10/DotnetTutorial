@@ -2,10 +2,7 @@ namespace CSharpTutorial;
 
 public struct Job
 {
-  public Job()
-  {
-    Site = "";
-  }
+  public Job() {}
   public Guid Id {get; set;}
   public string Site {get; set;} = "";
   public JobStatus Status {get; set;} = JobStatus.Undefined;

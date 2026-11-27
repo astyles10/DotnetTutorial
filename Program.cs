@@ -1,16 +1,4 @@
-﻿// Namespace defines a scope for organizing related types and namespaces (same concept as C++)
-namespace CSharpTutorial;
-
-// 'using' keyword imports a namespace or defines other 'using' directives. This would be similar to an #include <file>
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
-// Spin up some threads generating random numbers
-// Write some test classes
-// Write some test interfaces
-
+﻿namespace CSharpTutorial;
 
 class Program
 {
@@ -22,7 +10,7 @@ class Program
   // The C++ equivalent for this is typedef std::function<int>(void) cbFunctionType;
   public delegate int PostHandler();
   private static JobsDatabase _jobsDatabase = new();
-  private static JobsWebApi _jobsApi = new();
+  private readonly static JobsWebApi _jobsApi = new(ref _jobsDatabase);
 
   static void Main(string[] args)
   {
@@ -32,7 +20,6 @@ class Program
     }
 
     ParseCommandLineArgs(ref args);
-    _jobsDatabase.GetAllJobStatuses();
     _jobsDatabase.GetJobStatusForSite("Wodonga");
     // Next steps: Extend the Web API and integrate it with the database
     // Create a simple Web UI to interact with the API. There's probably some .NET MVC thing to use

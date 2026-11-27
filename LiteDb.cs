@@ -67,34 +67,6 @@ namespace CSharpTutorial
       return true;
     }
 
-    public bool GetAllJobStatuses()
-    {
-      // Test function to get number of rows
-      SqliteCommand command = _database.CreateCommand();
-      command.CommandText = """
-      SELECT last_insert_rowid();
-      """;
-      var numberOfRows = command.ExecuteScalar();
-      if (numberOfRows == null)
-      {
-        return false;
-      }
-
-      Console.WriteLine($"number of rows: {(long)numberOfRows}");
-      command.CommandText = """
-      SELECT jobid FROM jobs
-      WHERE id = $id;
-      """;
-      command.Parameters.AddWithValue("$id", numberOfRows);
-      using var reader = command.ExecuteReader();
-      Console.WriteLine($"Field count: {reader.FieldCount}");
-      while (reader.Read())
-      {
-        Console.WriteLine($"{reader.GetString(0)}");
-      }
-      return true;
-    }
-
     public void GetJobStatus(Guid jobGuid)
     {
       SqliteCommand command = _database.CreateCommand();
@@ -114,23 +86,32 @@ namespace CSharpTutorial
       }
     }
 
-    public void GetJobStatusForSite(string site)
+    public Job GetJobStatusForSite(string site)
     {
       SqliteCommand command = _database.CreateCommand();
       command.CommandText = """
       SELECT jobid, status, updated FROM jobs
       WHERE site = $site
+      LIMIT 1
       """;
       command.Parameters.AddWithValue("$site", site);
       var reader = command.ExecuteReader();
-      Console.WriteLine($"Field count: {reader.FieldCount}");
       while (reader.Read())
       {
         var jobId = reader.GetString(0);
         var status = (JobStatus)reader.GetInt64(1);
         var updatedAt = reader.GetString(2);
         Console.WriteLine($"{site} Id: {jobId} has status '{status}', last updated {updatedAt}");
+        Job job = new()
+        {
+          Id = new Guid(jobId),
+          Site = site,
+          Status = status,
+          UpdatedAt = DateTime.Parse(updatedAt)
+        };
+        return job;
       }
+      return default;
     }
   }
 }
